@@ -20,11 +20,17 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-import sys
 import unittest
+import wlang.ast as ast
+import wlang.sym
 
-if __name__ == '__main__':
-    test_names = ['test_parser', 'test_int', 'test_util',
-                  'test_stats_visitor', 'test_undef_visitor', 'test_sym']
-    suite = unittest.defaultTestLoader.loadTestsFromNames (['wlang.' + t for t in test_names])
-    result = unittest.TextTestRunner().run (suite)
+class TestSym (unittest.TestCase):
+    def test_one (self):
+        prg1 = "havoc x; assume x > 10; assert x > 15"
+        ast1 = ast.parse_string (prg1)
+        sym = wlang.sym.SymExec ()
+        st = wlang.sym.SymState ()
+        out = [s for s in sym.run (ast1, st)]
+        self.assertEquals (len(out), 1)
+        
+        

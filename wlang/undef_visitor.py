@@ -23,53 +23,133 @@ from __future__ import print_function
 
 import wlang.ast
             
+class UseDefFact (object):
+    """A dataflow fact for a statement.  Keeps track of all variables
+defined up to the statement and all uses without a definition.
+
+    """
+    def __init__ (self, defs = None, undefs = None):
+        # defined variables
+        if defs is None or len(defs) == 0:
+            self._defs = set ()
+        else:
+            self._defs = set (defs)
+            
+        # used but not defined
+        if undefs is None or len(undefs) == 0:
+            self._undefs = set ()
+        else:
+            self._undefs = set(undefs)
+
+    def get_defs (self):
+        return self._defs
+    def get_undefs (self):
+        return self._undefs
+    
+    def join (self, fact):
+        """Joins a given data-flow fact into this one"""
+        self._defs = self._defs.intersection (fact._defs)
+        self._undefs = self._undefs.union (fact._undefs)
+
+    def fork (self):
+        """Splits the current data-flow fact into two"""
+        return UseDefFact (self._defs, self._undefs)
+        
+    def mark_use (self, var):
+        """Marks variable as used"""
+        if not var in self._defs:
+            self._undefs.add (var)
+    
+    def mark_def (self, var):
+        """Marks variable as defined"""
+        self._defs.add (var)
 class UndefVisitor (wlang.ast.AstVisitor):
     """Computes all variables that are used before being defined"""
     def __init__ (self):
         super (UndefVisitor, self).__init__ ()
-        pass
+        self._df = UseDefFact ()
 
-    def check (self, node):
-        """Check for undefined variables starting from a given AST node"""
-        # do the necessary setup/arguments and call self.visit (node, args)
-        pass
+    def get_defs (self):
+        return self._df.get_defs ()
 
     def get_undefs (self):
-        """Return the set of all variables that are used before being defined
-           in the program.  Available only after a call to check()
-        """
-        pass
+        return self._df.get_undefs ()
+    
+    def check (self, node):
+        self._df = self.visit (node, df=UseDefFact())
         
     def visit_StmtList (self, node, *args, **kwargs):
-        pass
+        df = kwargs['df']
+        if node.stmts is None:
+            return df
+        
+        for n in node.stmts:
+            df = self.visit (n, df=df)
+        return df
     
     def visit_IntVar (self, node, *args, **kwargs):
-        pass
+        df = kwargs['df']
+        df.mark_use (node)
+        return df
             
     def visit_Const (self, node, *args, **kwargs):
-        pass
+        return kwargs['df']
     
     def visit_Stmt (self, node, *args, **kwargs):
-        pass
+        return kwargs['df']
     
     def visit_AsgnStmt (self, node, *args, **kwargs):
-        pass
+        df = kwargs['df']
+        df = self.visit (node.rhs, df=df)
+        df.mark_def (node.lhs)
+        return df
 
     def visit_Exp (self, node, *args, **kwargs):
-        pass
+        df = kwargs['df']
+        for a in node.args:
+            df = self.visit (a, df=df)
+        return df
     
     def visit_HavocStmt (self, node, *args, **kwargs):
-        pass
+        df = kwargs['df']
+        for v in node.vars:
+            df = self.vist (v, df=df)
+        return df
     
     def visit_AssertStmt (self, node, *args, **kwargs):
-        pass
+        return self.visit (node.cond, *args, **kwargs)
     
     def visit_AssumeStmt (self, node, *args, **kwargs):
-        pass
+        return self.visit (node.cond, *args, **kwargs)
 
     def visit_IfStmt (self, node, *args, **kwargs):
-        pass
+        df = kwargs['df']
+        df = self.visit (node.cond, df=df)
+        df_else = df.fork ()
+        df = self.visit (node.then_stmt, df=df)
+        if node.has_else():
+            df_else = self.visit (node.else_stmt, df=df_else)
+        df.join (df_else)
+        return df
 
     def visit_WhileStmt (self, node, *args, **kwargs):
-        pass
+        df = kwargs['df']
+        df = self.visit (node.cond, df=df)
+        df_else = df.fork ()
+        df = self.visit (node.body, df=df)
+        df.join (df_else)
+        return df
+        
+    
+def main ():
+    import sys
+    
+    ast = wlang.ast.parse_file (sys.argv[1])
+    uv = UndefVisitor ()
+    uv.check (ast)
+    print ('defs at end', uv.get_defs (), 'undefs at end:', uv.get_undefs ())
+    
+if __name__ == '__main__':
+    import sys
+    sys.exit (main())
         
