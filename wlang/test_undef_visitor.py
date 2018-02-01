@@ -2,8 +2,8 @@ import unittest
 import wlang.ast as ast
 import wlang.undef_visitor as undef_visitor
 
-class TestStatsVisitor (unittest.TestCase):
-    def test_one (self):
+class TestUndefVisitor (unittest.TestCase):
+    def test1 (self):
         prg1 = "x := 10; y := x + z"
         ast1 = ast.parse_string (prg1)
 
@@ -28,7 +28,7 @@ class TestStatsVisitor (unittest.TestCase):
         uv = undef_visitor.UndefVisitor ()
         uv.check (ast1)
         self.assertEquals (set ([ast.IntVar('z')]), uv.get_undefs ())
-        
+
     def test4 (self):
         """Use an undefined variable to re-define itself"""
         prg1 = "x:=x+1"
@@ -37,7 +37,7 @@ class TestStatsVisitor (unittest.TestCase):
         uv = undef_visitor.UndefVisitor ()
         uv.check (ast1)
         self.assertEquals (set ([ast.IntVar('x')]), uv.get_undefs ())
-        
+
     def test5 (self):
         """Defined inside body of a loop"""
         prg1 = "while true do x := 1 ; y := x"
@@ -46,7 +46,7 @@ class TestStatsVisitor (unittest.TestCase):
         uv = undef_visitor.UndefVisitor ()
         uv.check (ast1)
         self.assertEquals (set ([ast.IntVar('x')]), uv.get_undefs ())
-        
+
     def test6 (self):
         """Undefined use in a conditional"""
         prg1 = "if x > 0 then skip else skip"
@@ -55,8 +55,8 @@ class TestStatsVisitor (unittest.TestCase):
         uv = undef_visitor.UndefVisitor ()
         uv.check (ast1)
         self.assertEquals (set ([ast.IntVar('x')]), uv.get_undefs ())
-        
-    def test6 (self):
+
+    def test7 (self):
         """Undefined use in a loop condition"""
         prg1 = "while x > 0 do skip"
         ast1 = ast.parse_string (prg1)
@@ -64,8 +64,8 @@ class TestStatsVisitor (unittest.TestCase):
         uv = undef_visitor.UndefVisitor ()
         uv.check (ast1)
         self.assertEquals (set ([ast.IntVar('x')]), uv.get_undefs ())
-        
-    def test6 (self):
+
+    def test8 (self):
         """Undefined use in assume"""
         prg1 = "assume x > 0"
         ast1 = ast.parse_string (prg1)
@@ -73,8 +73,8 @@ class TestStatsVisitor (unittest.TestCase):
         uv = undef_visitor.UndefVisitor ()
         uv.check (ast1)
         self.assertEquals (set ([ast.IntVar('x')]), uv.get_undefs ())
-        
-    def test6 (self):
+
+    def test9 (self):
         """Undefined use in assert"""
         prg1 = "assert x > 0"
         ast1 = ast.parse_string (prg1)
@@ -83,7 +83,7 @@ class TestStatsVisitor (unittest.TestCase):
         uv.check (ast1)
         self.assertEquals (set ([ast.IntVar('x')]), uv.get_undefs ())
 
-    def test7 (self):
+    def test10 (self):
         """havoc is a definition"""
         prg1 = "havoc x ; y := x"
         ast1 = ast.parse_string (prg1)
@@ -91,4 +91,3 @@ class TestStatsVisitor (unittest.TestCase):
         uv = undef_visitor.UndefVisitor ()
         uv.check (ast1)
         self.assertEquals (set (), uv.get_undefs ())
-        
