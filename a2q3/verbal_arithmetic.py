@@ -82,8 +82,7 @@ def solve (s1, s2, s3):
 
     # make sure each var is single digit
     for v in get_vars():
-        solver.add(v <= 9)
-        solver.add(0 <= v)
+        solver.add(0 <= v, v <= 9)
 
     # all solutions should be distinct
     solver.add(z3.Distinct(get_vars()))
