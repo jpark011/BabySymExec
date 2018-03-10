@@ -235,7 +235,8 @@ class SymExec (wlang.ast.AstVisitor):
         st.add_pc(cond)
 
         if st.is_empty():
-            assert False, 'Assertion error: ' + str (node) + str(st)
+            print('Assertion error: ' + str (node))
+            return []
         return [st]
 
     def visit_AssumeStmt (self, node, *args, **kwargs):
