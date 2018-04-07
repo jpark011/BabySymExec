@@ -1,14 +1,9 @@
-# ECE453/CS447 : Assignment 2
+# BabySymExec
 
-Replace FIRST_NAME, LAST_NAME, WATIAM, and STUDENT_ID, EMAIL in
-`user.yml` by your first and last name, WatIAM id, student number, and
-email, respectively. Note that your WatIAM id is the ID you use to
-login to Quest. Use plain ASCII characters as much as possible.
+### Python Z3
+https://github.com/Z3Prover/z3
 
-Do not change the format of the file. We will parse it
-automatically. Only enter the information requested.
-
-Commit your changes and submit on GitHub.
-
-You can validate your yaml file using online YAML parser:
-http://yaml-online-parser.appspot.com/
+### SMT Solver
+It is a Baby Symbloic Executor that keeps track of _symbolic states_ with its _path conditions_.
+- Built on _Visitor_ pattern
+- Symbolic Execution on WHILE lang.
